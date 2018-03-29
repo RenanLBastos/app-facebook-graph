@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html 
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:fb="http://www.facebook.com/2008/fbml">
+<head>
+<title>App Ginga</title>
+</head>
+<body>
+<div id="fb-root"></div>
+<script>
+	function onFriendsListLoaded(response)
+	{
+		//alert("onFriendsListLoaded");	
+		var divTarget=document.getElementById("friends-list-container");
+		var data=response.data;
+		//alert("divTarget="+divTarget+"\ndata="+data);
+        
+        // RAMDOMIZE
+		for (var friendIndex=0; friendIndex<data.length; friendIndex++)     
+		{
+            var swapIndex=Math.floor(Math.random()*data.length);
+            var temp=data[friendIndex];
+            data[friendIndex]=data[swapIndex];
+            data[swapIndex]=temp;
+        }
+        
+        // LIMIT TO 5
+		for (var friendIndex=0; friendIndex<20; friendIndex++)     
+		{
+			var divContainer = document.createElement("div");
+			divContainer.innerHTML="<hr><img src='http://graph.facebook.com/"+data[friendIndex].id+"/picture'></img><br>"+data[friendIndex].name;
+			divTarget.appendChild(divContainer);
+		}
+	}
+	function showFriendsList()
+	{
+		FB.api('/me/friends', onFriendsListLoaded);  
+	}
+
+	
+	window.fbAsyncInit = function() 
+	{
+		FB.Event.subscribe('auth.statusChange', onFacebookStatusChange);
+		FB.init({
+			appId  : '375786939204714',
+			status : true, // check login status
+			cookie : true, // enable cookies to allow the server to access the session
+			xfbml  : true  // parse XFBML
+		});
+
+		FB.getLoginStatus(onFacebookInitialLoginStatus);   
+	};
+
+	(function() {
+		var e = document.createElement('script');
+		e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+		e.async = true;
+		document.getElementById('fb-root').appendChild(e);
+	}());
+
+	function facebookLogin()
+	{
+		FB.login(onFacebookLoginStatus, {scope:'read_stream,publish_stream'});
+	}
+
+	/*
+	* Callback function for 'auth.statusChange' event.
+	*/
+	function onFacebookInitialLoginStatus(response)
+	{
+		/*alert("onFacebookLoginStatus(), "
+			+ "\nresponse.status="+response.status
+			+" \nresponse.authResponse="+response.authResponse
+			+" \nresponse.perms="+response.perms);*/
+		if (response.status=="connected" && response.authResponse)
+		{
+			//alert("You are all set.");
+			var loginButtonDiv=document.getElementById("fb-login-button-div");
+			loginButtonDiv.style.display="none";
+			showFriendsList();
+		}
+		else
+		{
+			facebookLogin();
+		}
+	}  
+
+	/*
+	* Callback function for 'auth.statusChange' event.
+	*/
+	function onFacebookStatusChange(response)
+	{
+		/*alert("onFacebookStatusChange(), "
+			+ "\nresponse.status="+response.status
+			+" \nresponse.authResponse="+response.authResponse
+			+" \nresponse.perms="+response.perms);*/
+		//onFacebookLoginStatus(response);  
+	}
+
+	/*
+	* Callback function for 'auth.statusChange' event.
+	*/
+	function onFacebookLoginStatus(response)
+	{
+	
+		/*alert("onFacebookLoginStatus(), "
+			+ "\nresponse.status="+response.status
+			+" \nresponse.authResponse="+response.authResponse
+			+" \nresponse.perms="+response.perms);*/
+			
+		if (response.status=="connected" && response.authResponse)
+		{
+			var loginButtonDiv=document.getElementById("fb-login-button-div");
+			loginButtonDiv.style.display="none";
+			showFriendsList();
+		}
+		else
+		{
+			alert("Please login to enjoy this application.");
+		}
+	} 
+	
+	
+</script>
+
+<div id="fb-login-button-div">
+ 
+<fb:login-button show-faces="false" scope="read_stream,publish_stream"></fb:login-button>
+</div>
+<div id="friends-list-container">
+</div>
+
+</html>
